@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     var people = [Person]()
     var refreshController = UIRefreshControl()
@@ -27,15 +27,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
-        cell.textLabel?.text = "\(people[indexPath.row].fullName)- (\(people[indexPath.row].id)) --- \(indexPath.row+1)"
+        if (people.count > indexPath.row) {
+            cell.textLabel?.text = "\(people[indexPath.row].fullName)- (\(people[indexPath.row].id)) --- \(indexPath.row+1)"
+        }
         return cell
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let position = scrollView.contentOffset.y
-        if position > (tableView.conü.height - 100 )
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == people.count - 1{
+            fetchData()
+        }
     }
-    
     @IBOutlet weak var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -54,10 +56,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     @objc func refreshData() {
+        self.people.removeAll()
+        fetchData()
+    }
+    
+    func fetchData() {
         
         DataSource.fetch(next: self.fNext) { response, error in
-            if let _ = response {
-                print("------------- sonraki responsee geldiiii \(response?.people.count!) --------------")
+            if let _ = response {               
                 response?.people.forEach({ person in
                     self.people.append(person)
                 })
