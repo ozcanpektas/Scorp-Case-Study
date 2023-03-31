@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
     
     var people = [Person]()
     var refreshController = UIRefreshControl()
@@ -31,6 +31,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return cell
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        if position > (tableView.conü.height - 100 )
+    }
+    
     @IBOutlet weak var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -52,7 +57,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         DataSource.fetch(next: self.fNext) { response, error in
             if let _ = response {
-                print("------------- sonraki responsee geldiiii \(response?.people.count) --------------")
+                print("------------- sonraki responsee geldiiii \(response?.people.count!) --------------")
                 response?.people.forEach({ person in
                     self.people.append(person)
                 })
