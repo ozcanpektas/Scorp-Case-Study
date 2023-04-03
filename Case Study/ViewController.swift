@@ -29,7 +29,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
         if (people.count > indexPath.row) {
-            cell.textLabel?.text = "\(people[indexPath.row].fullName)- (\(people[indexPath.row].id)) --- \(indexPath.row+1)"
+            cell.textLabel?.text = "\(people[indexPath.row].fullName) (\(people[indexPath.row].id))"
         }
         return cell
     }
