@@ -116,7 +116,6 @@ public class DataSource {
                 else if beginIndex == 0 && RandomUtils.roll(forProbabilityGTZero: Constants.emptyFirstResultsProbability) {
                     fetchedPeople = []
                     responseNext = nil
-                    responseNext = nil
                 }
                 response = FetchResponse(people: fetchedPeople,
                                            next: responseNext)

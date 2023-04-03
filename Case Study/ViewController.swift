@@ -7,11 +7,12 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
     
     var people = [Person]()
     var refreshController = UIRefreshControl()
     var fNext: String? = nil
+    var isPaginating = false
 
     lazy var infoLabel: UILabel = {
         var _infoLabel: UILabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
@@ -33,11 +34,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return cell
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row == people.count - 1{
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        if position > (tableView.contentSize.height - 100 - scrollView.frame.size.height) {
             fetchData()
+            isPaginating = true
         }
+        tableView.tableFooterView = createFooterSpinner()
     }
+                       
     @IBOutlet weak var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -61,12 +67,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func fetchData() {
+        if isPaginating {
+           return
+        }
         
         DataSource.fetch(next: self.fNext) { response, error in
-            if let _ = response {               
+            if let _ = response {
+                self.fNext = response?.next
                 response?.people.forEach({ person in
-                    self.people.append(person)
+                    if !self.isIdDuplicate(person: person) {
+                        self.people.append(person)
+                    }
                 })
+                
                 self.tableView.reloadData()
                 self.refreshController.endRefreshing()
                 
@@ -75,15 +88,39 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 }
                 
             }
-            if let _ = error {
-                print("errrorrr happened")
+            
+            if let err = error {
+                print("\(err.errorDescription)")
                 self.tableView.reloadData()
                 self.refreshController.endRefreshing()
+            }
+            
+            if self.isPaginating {
+                DispatchQueue.main.async {
+                    self.tableView.tableFooterView = nil
+                }
+                self.isPaginating = false
             }
         }
         
     }
 
+    private func createFooterSpinner() -> UIView {
+        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100))
+        let spinner = UIActivityIndicatorView()
+        spinner.center = footerView.center
+        footerView.addSubview(spinner)
+        spinner.startAnimating()
+        return footerView
+    }
     
+    private func isIdDuplicate(person: Person) -> Bool {
+        for element in people {
+            if element.id == person.id {
+                return true
+            }
+        }
+        return false
+    }
 }
 
